@@ -1,0 +1,88 @@
+0:Connection established to flaskapp on port 5000
+0:not in cache
+0:Requesting GET http://flaskapp:5000/cache HTTP/1.1 from flaskapp
+0:Received HTTP/1.1 200 OK from flaskapp
+0:cached, but requires re-validation
+0:Responding HTTP/1.1 200 OK
+
+1:Connection established to flaskapp on port 5000
+1:in cache, valid
+1:Responding HTTP/1.1 200 OK
+
+2:Connection established to flaskapp on port 5000
+2:in cache, but past max-age of 10 seconds
+2:Requesting GET http://flaskapp:5000/cache HTTP/1.1 from flaskapp
+2:Received HTTP/1.1 200 OK from flaskapp
+2:cached, but requires re-validation
+2:Responding HTTP/1.1 200 OK
+
+3:Connection established to flaskapp on port 5000
+3:not in cache
+3:Requesting GET http://flaskapp:5000/no-store HTTP/1.1 from flaskapp
+3:Received HTTP/1.1 200 OK from flaskapp
+3:not cacheable because: Cache-control is no-store
+3:Responding HTTP/1.1 200 OK
+
+4:Connection established to flaskapp on port 5000
+4:not in cache
+4:Requesting GET http://flaskapp:5000/private HTTP/1.1 from flaskapp
+4:Received HTTP/1.1 200 OK from flaskapp
+4:not cacheable because: Cache-control is private
+4:Responding HTTP/1.1 200 OK
+
+5:Connection established to flaskapp on port 5000
+5:not in cache
+5:Requesting GET http://flaskapp:5000/private HTTP/1.1 from flaskapp
+5:Received HTTP/1.1 200 OK from flaskapp
+5:not cacheable because: Cache-control is private
+5:Responding HTTP/1.1 200 OK
+
+6:Connection established to flaskapp on port 5000
+6:not in cache
+6:Requesting GET http://flaskapp:5000/private HTTP/1.1 from flaskapp
+6:Received HTTP/1.1 200 OK from flaskapp
+6:not cacheable because: Cache-control is private
+6:Responding HTTP/1.1 200 OK
+
+7:Connection established to flaskapp on port 5000
+7:not in cache
+7:Requesting GET http://flaskapp:5000/expires-success HTTP/1.1 from flaskapp
+7:Received HTTP/1.1 200 OK from flaskapp
+7:in cache, requires validation
+7:Responding HTTP/1.1 200 OK
+
+8:Connection established to flaskapp on port 5000
+8:not in cache
+8:Requesting GET http://flaskapp:5000/expires-failed HTTP/1.1 from flaskapp
+8:Received HTTP/1.1 200 OK from flaskapp
+8:in cache, requires validation
+8:Responding HTTP/1.1 200 OK
+
+9:Connection established to flaskapp on port 5000
+9:not in cache
+9:Requesting GET http://flaskapp:5000/etag-variable HTTP/1.1 from flaskapp
+9:Received HTTP/1.1 200 OK from flaskapp
+9:cached, but requires re-validation
+9:Responding HTTP/1.1 200 OK
+
+10:Connection established to flaskapp on port 5000
+10:not in cache
+10:Requesting GET http://flaskapp:5000/etag-constant HTTP/1.1 from flaskapp
+10:Received HTTP/1.1 200 OK from flaskapp
+10:cached, but requires re-validation
+10:Responding HTTP/1.1 200 OK
+
+11:Connection established to flaskapp on port 5000
+11:not in cache
+11:Requesting GET http://flaskapp:5000/last-modified-variable HTTP/1.1 from flaskapp
+11:Received HTTP/1.1 200 OK from flaskapp
+11:cached, but requires re-validation
+11:Responding HTTP/1.1 200 OK
+
+12:Connection established to flaskapp on port 5000
+12:not in cache
+12:Requesting GET http://flaskapp:5000/last-modified-constant HTTP/1.1 from flaskapp
+12:Received HTTP/1.1 200 OK from flaskapp
+12:cached, but requires re-validation
+12:Responding HTTP/1.1 200 OK
+

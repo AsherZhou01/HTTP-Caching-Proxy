@@ -1,0 +1,19 @@
+{
+  "args": {}, 
+  "data": "{\"Location\": \"Durham\"}", 
+  "files": {}, 
+  "form": {}, 
+  "headers": {
+    "Accept": "*/*", 
+    "Content-Length": "22", 
+    "Content-Type": "application/json", 
+    "Host": "httpbin.org", 
+    "User-Agent": "curl/7.68.0", 
+    "X-Amzn-Trace-Id": "Root=1-65f89978-013604435508f5a2665f1443"
+  }, 
+  "json": {
+    "Location": "Durham"
+  }, 
+  "origin": "67.159.89.120", 
+  "url": "https://httpbin.org/post"
+}

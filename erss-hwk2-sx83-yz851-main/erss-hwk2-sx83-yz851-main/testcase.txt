@@ -1,0 +1,222 @@
+1. curl -x http://localhost:12345 http://flaskapp:5000/cache -o /dev/null -v
+Test that the response is cacheable with a max-age of 10 seconds.
+
+0:Connection established to flaskapp on port 5000
+0:not in cache
+0:Requesting GET http://flaskapp:5000/cache HTTP/1.1 from flaskapp
+0:Received HTTP/1.1 200 OK from flaskapp
+0:cached, but requires re-validation
+0:Responding HTTP/1.1 200 OK
+
+1:Connection established to flaskapp on port 5000
+1:in cache, valid
+1:Responding HTTP/1.1 200 OK
+
+2:Connection established to flaskapp on port 5000
+2:in cache, but past max-age of 10 seconds
+2:Requesting GET http://flaskapp:5000/cache HTTP/1.1 from flaskapp
+2:Received HTTP/1.1 200 OK from flaskapp
+2:cached, but requires re-validation
+2:Responding HTTP/1.1 200 OK
+
+
+2. curl -x http://localhost:12345 http://flaskapp:5000/no-store -o /dev/null -v
+Verify the response should not be cached, as indicated by the no-store directive.
+
+0:Connection established to flaskapp on port 5000
+0:not in cache
+0:Requesting GET http://flaskapp:5000/no-store HTTP/1.1 from flaskapp
+0:Received HTTP/1.1 200 OK from flaskapp
+0:not cacheable because: Cache-control is no-store
+0:Responding HTTP/1.1 200 OK
+
+
+
+3. curl -x http://localhost:12345 http://flaskapp:5000/private -o /dev/null -v
+Ensure the response is marked as private, intended for client-side caching only.
+
+1:Connection established to flaskapp on port 5000
+1:not in cache
+1:Requesting GET http://flaskapp:5000/private HTTP/1.1 from flaskapp
+1:Received HTTP/1.1 200 OK from flaskapp
+1:not cacheable because: Cache-control is private
+1:Responding HTTP/1.1 200 OK
+
+
+
+4. curl -x http://localhost:12345 http://flaskapp:5000/expires-success -o /dev/null -v
+Check if the response correctly sets an Expires header with a future date, indicating cache validity.
+
+2:Connection established to flaskapp on port 5000
+2:not in cache
+2:Requesting GET http://flaskapp:5000/expires-success HTTP/1.1 from flaskapp
+2:Received HTTP/1.1 200 OK from flaskapp
+2:in cache, requires validation
+2:Responding HTTP/1.1 200 OK
+
+3:Connection established to flaskapp on port 5000
+3:in cache, valid
+3:Responding HTTP/1.1 200 OK
+
+4:Connection established to flaskapp on port 5000
+4:in cache, but expired at Mon, 18 Mar 2024 22:05:21 GMT
+4:Requesting GET http://flaskapp:5000/expires-success HTTP/1.1 from flaskapp
+4:Received HTTP/1.1 200 OK from flaskapp
+4:in cache, requires validation
+4:Responding HTTP/1.1 200 OK
+
+5. curl -x http://localhost:12345 http://flaskapp:5000/expires-failed -o /dev/null -v
+Confirm the response sets an Expires header with a past date, signaling the content is no longer valid.
+
+5:Connection established to flaskapp on port 5000
+5:not in cache
+5:Requesting GET http://flaskapp:5000/expires-failed HTTP/1.1 from flaskapp
+5:Received HTTP/1.1 200 OK from flaskapp
+5:in cache, requires validation
+5:Responding HTTP/1.1 200 OK
+
+6:Connection established to flaskapp on port 5000
+6:in cache, but expired at Mon, 18 Mar 2024 22:04:21 GMT
+6:Requesting GET http://flaskapp:5000/expires-failed HTTP/1.1 from flaskapp
+6:Received HTTP/1.1 200 OK from flaskapp
+6:in cache, requires validation
+6:Responding HTTP/1.1 200 OK
+
+
+6. curl -x http://localhost:12345 http://flaskapp:5000/etag-variable -o /dev/null -v
+Validate the handling of ETag for cache validation, ensuring it changes with each request.
+
+7:Connection established to flaskapp on port 5000
+7:not in cache
+7:Requesting GET http://flaskapp:5000/etag-variable HTTP/1.1 from flaskapp
+7:Received HTTP/1.1 200 OK from flaskapp
+7:cached, but requires re-validation
+7:Responding HTTP/1.1 200 OK
+
+8:Connection established to flaskapp on port 5000
+8:Requesting GET http://flaskapp:5000/etag-variable HTTP/1.1 from ttp
+8:Received HTTP/1.1 200 OK from ttp
+8:cached, but requires re-validation
+8:Responding HTTP/1.1 200 OK
+
+
+7. curl -x http://localhost:12345 http://flaskapp:5000/etag-constant -o /dev/null -v
+Test the ETag remains constant across requests to validate cache reusability.
+
+
+8. curl -x http://localhost:12345 http://flaskapp:5000/last-modified-variable -o /dev/null -v
+Ensure the Last-Modified header updates with each request, affecting cache validation.
+
+9:Connection established to flaskapp on port 5000
+9:not in cache
+9:Requesting GET http://flaskapp:5000/last-modified-variable HTTP/1.1 from flaskapp
+9:Received HTTP/1.1 200 OK from flaskapp
+9:cached, but requires re-validation
+9:Responding HTTP/1.1 200 OK
+
+10:Connection established to flaskapp on port 5000
+10:Requesting GET http://flaskapp:5000/last-modified-variable HTTP/1.1 from ttp
+10:Received HTTP/1.1 200 OK from ttp
+10:cached, but requires re-validation
+10:Responding HTTP/1.1 200 OK
+
+
+9. curl -x http://localhost:12345 http://flaskapp:5000/last-modified-constant -o /dev/null -v
+Check that a constant Last-Modified date is correctly used for cache validation across requests.
+
+
+Code:
+# -*- coding: utf-8 -*-
+from flask import Flask, make_response, request
+from datetime import datetime, timedelta
+import email.utils as eut
+
+app = Flask(__name__)
+
+ETAG_VALUE = 0
+LAST_MODIFIED = datetime.utcnow()
+
+@app.route('/cache')
+def cache():
+    resp = make_response('This response is cacheable.\n')
+    resp.headers['Cache-Control'] = 'max-age=10'
+    return resp
+
+@app.route('/no-store')
+def no_store():
+    resp = make_response('This response should not be cached.\n')
+    resp.headers['Cache-Control'] = 'no-store'
+    return resp
+
+@app.route('/private')
+def private():
+    resp = make_response('This response is private.\n')
+    resp.headers['Cache-Control'] = 'private'
+    return resp
+
+@app.route('/expires-success')
+def expires_success():
+    resp = make_response('This response has an Expires header and it is in the future.\n')
+    expires_time = datetime.utcnow() + timedelta(seconds=60) - timedelta(seconds=4 * 3600)
+    resp.headers['Expires'] = expires_time.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    return resp
+
+@app.route('/expires-failed')
+def expires_failed():
+    resp = make_response('This response has an Expires header and it is in the past.\n')
+    expires_time = datetime.utcnow() - timedelta(seconds=120) - timedelta(seconds=4 * 3600)
+    resp.headers['Expires'] = expires_time.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    return resp
+
+@app.route('/etag-variable')
+def etag_variable():
+    global ETAG_VALUE
+    ETAG_VALUE += 1
+    etag = str(ETAG_VALUE)
+
+    if 'If-None-Match' in request.headers and request.headers['If-None-Match'] == etag:
+        return ('', 304)
+    resp = make_response('ETag will change for each request.\n')
+    resp.headers['ETag'] = etag
+    return resp
+
+@app.route('/etag-constant')
+def etag_constant():
+    etag = "constant-etag"
+
+    if 'If-None-Match' in request.headers and request.headers['If-None-Match'] == etag:
+        return ('', 304)
+    resp = make_response('ETag is constant for all requests.\n')
+    resp.headers['ETag'] = etag
+    return resp
+
+@app.route('/last-modified-variable')
+def last_modified_variable():
+    last_modified = datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+    if 'If-Modified-Since' in request.headers:
+        if_modified_since = datetime(*eut.parsedate(request.headers['If-Modified-Since'])[:6])
+        if if_modified_since >= datetime.utcnow():
+            return ('', 304)
+    resp = make_response('Last-Modified will change for each request.\n')
+    resp.headers['Last-Modified'] = last_modified
+    return resp
+
+@app.route('/last-modified-constant')
+def last_modified_constant():
+    global LAST_MODIFIED
+    last_modified = LAST_MODIFIED.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+    if 'If-Modified-Since' in request.headers:
+        if_modified_since = datetime(*eut.parsedate(request.headers['If-Modified-Since'])[:6])
+        if if_modified_since >= LAST_MODIFIED:
+            return ('', 304)
+    resp = make_response('Last-Modified is constant for all requests.\n')
+    resp.headers['Last-Modified'] = last_modified
+    return resp
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+   

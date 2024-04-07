@@ -1,0 +1,8 @@
+1. Error response handling: Ensure graceful handling of errors or malformed responses from the origin server to prevent proxy crashes or undefined behavior.
+2. Limited HTTP method support: Explicitly check and return a 501 Not Implemented response to clients for unsupported HTTP methods, maintaining proxy stability and expected behavior.
+3. Error handling and thread management: Use structured exception handling within threads to ensure safe interruption and cleanup in the event of exceptions or unexpected termination, preserving the overall operation of the proxy.
+4. Sensitive information in logs: Implement filtering or redaction techniques in the logging mechanism to prevent logging sensitive information, with a recommendation to support HTTPS for enhanced data encryption.
+5. Handling unusual server responses: Design the proxy to correctly handle all valid HTTP status codes, including logging and forwarding server responses unchanged to the client.
+6. Cache eviction policy: Implement a Least Recently Used (LRU) or similar cache eviction strategy to remove old cache entries when exceeding cache capacity, ensuring efficient cache storage management.
+7. Cache validation and expiration: Treat cache entries without max_age or with max_age set to 0 as needing revalidation with the origin server, implementing mechanisms for cache freshness checks and updates based on HTTP headers.
+8. Dynamic cache entry types: Monitor changes in caching directives in each response and dynamically update the caching strategy for each URL, including removing entries from the cache when they are set to no-store.

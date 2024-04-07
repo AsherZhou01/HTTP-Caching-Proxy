@@ -1,0 +1,33 @@
+# version: '2'
+
+# services:
+#   main:
+#     build: ./src
+#     volumes:
+#       - ./src:/var/log/erss
+#     ports:
+#       - "12345:12345"
+version: '2.2'
+
+services:
+  main:
+    build:
+      context: ./src
+      dockerfile: Dockerfile-cpp
+    volumes:
+      - ./src:/var/log/erss
+    ports:
+      - "12345:12345"
+    networks:
+      - app-network
+  flaskapp:
+    build: ./src
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./src:/app
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
